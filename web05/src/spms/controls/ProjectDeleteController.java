@@ -4,29 +4,28 @@ import java.util.Map;
 
 import spms.annotation.Component;
 import spms.bind.DataBinding;
-import spms.dao.MySqlMemberDao;
+import spms.dao.MySqlProjectDao;
 
-@Component("/member/delete.do")
-public class MemberDeleteController implements Controller, DataBinding{
-	MySqlMemberDao memberDao;
+@Component("/project/delete.do")
+public class ProjectDeleteController implements Controller, DataBinding {
+	MySqlProjectDao projectDao;
 	
-	public MemberDeleteController setMemberDao(MySqlMemberDao memberDao) {
-		this.memberDao = memberDao;
+	public ProjectDeleteController setProjectDao(MySqlProjectDao projectDao) {
+		this.projectDao = projectDao;
 		return this;
 	}
-	
+
 	@Override
 	public Object[] getDataBinders() {
 		return new Object[] {"no", Integer.class};
 	}
-	
+
 	@Override
 	public String execute(Map<String, Object> model) throws Exception {
 		Integer no = (Integer)model.get("no");
 		
 		if(no != null) {
-//			MemberDao memberDao = (MemberDao)model.get("memberDao");
-			memberDao.delete(no);
+			projectDao.delete(no);
 		}
 		return "redirect:list.do";
 	}

@@ -7,7 +7,7 @@ import spms.bind.DataBinding;
 import spms.dao.MySqlMemberDao;
 import spms.vo.Member;
 
-@Component("update.do")
+@Component("/member/update.do")
 public class MemberUpdateController implements Controller, DataBinding{
 	MySqlMemberDao memberDao;
 	

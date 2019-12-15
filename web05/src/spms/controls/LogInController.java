@@ -9,7 +9,7 @@ import spms.bind.DataBinding;
 import spms.dao.MySqlMemberDao;
 import spms.vo.Member;
 
-@Component("login.do")
+@Component("/auth/login.do")
 public class LogInController implements Controller, DataBinding {
 	MySqlMemberDao memberDao;
 	
