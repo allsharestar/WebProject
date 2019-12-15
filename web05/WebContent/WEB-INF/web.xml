@@ -8,6 +8,11 @@
 	version="4.0">
 	<display-name>web05</display-name>
 	
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/application-context.properties</param-value>
+	</context-param>
+	
 	<!-- 
 	<resource-ref>
 		<res-ref-name>JNDI 이름</res-ref-name>

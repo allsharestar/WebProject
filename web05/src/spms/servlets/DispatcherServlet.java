@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import spms.bind.DataBinding;
 import spms.bind.ServletRequestDataBinder;
+import spms.context.ApplicationContext;
 import spms.controls.Controller;
 import spms.controls.LogInController;
 import spms.controls.LogOutController;
@@ -21,6 +22,7 @@ import spms.controls.MemberAddController;
 import spms.controls.MemberDeleteController;
 import spms.controls.MemberListController;
 import spms.controls.MemberUpdateController;
+import spms.listeners.ContextLoaderListener;
 import spms.vo.Member;
 
 // 프런트 컨트롤러
@@ -31,7 +33,11 @@ public class DispatcherServlet extends HttpServlet{
 		response.setContentType("text/html; charset=UTF-8");
 		String servletPath = request.getServletPath();
 		try {
-			ServletContext sc = this.getServletContext();
+			// 이전에는 페이지 컨트롤러가 ServletContext에 저장되었기 때문에 이 객체를 준비하였지만 이제는 필요없다. 
+//			ServletContext sc = this.getServletContext();
+			// ApplicationContext를 도입하면서 필요가 없어졌습니다.
+			// 대신 ContextLoaderListener의 getApplicationLocation을 호출하여 ApplicationContext의 객체를 꺼냅니다.
+			ApplicationContext ctx = ContextLoaderListener.getApplicationContext();
 			
 			// 맵 객체 준비 MemberListController가 사용할 객체를 준비하면 Map객체에 담아 전달
 			HashMap<String, Object> model = new HashMap<String, Object>();
@@ -43,8 +49,14 @@ public class DispatcherServlet extends HttpServlet{
 			
 			
 			// 페이지 컨트롤러는 Controller의 구현체이기 때문에, 인터페이스 타입의 참조 변수로 선언
-			Controller pageController = (Controller)sc.getAttribute(servletPath);
-			
+//			Controller pageController = (Controller)sc.getAttribute(servletPath);
+			// 페이지 컨트롤러를 찾을 때도 ServletContext에서 찾지 않기 때문에 위 코드 제거
+			// 대신 ApplicationContext의 getBean을 호출하여 페이지 컨트롤러를 찾습니다.
+			Controller pageController = (Controller)ctx.getBean(servletPath);
+			// 위 코드에서 만약 찾지 못한다면 오류를 발생 시킵니다.
+			if(pageController == null) {
+				throw new Exception("요청한 서비스를 찾을 수 없습니다.");
+			}
 			
 			// 밑에 if ~ else문을 자동화 시켜줄 거임
 			// DataBinding을 구현했는지 여부를 검사하하여, 해당 인터페이스를 구현한 경우에만 prepareRequestData호출

@@ -11,9 +11,11 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 
+import spms.annotation.Component;
 import spms.util.DBConnectionPool;
 import spms.vo.Member;
 
+@Component("memberDao")
 public class MySqlMemberDao implements MemberDao {
 //	DBConnectionPool connPool;
 	DataSource ds;
