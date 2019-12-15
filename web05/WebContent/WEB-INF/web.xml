@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+	http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" 
+	id="WebApp_ID" 
+	version="4.0">
+	<display-name>web05</display-name>
+	
+	<!-- 
+	<resource-ref>
+		<res-ref-name>JNDI 이름</res-ref-name>
+		<res-type>리턴될 자원릐 클래스 이름(패키지명 포함) context.xml에 선언한 자원의 타입과 같아야 한다.</res-type>
+		<res-auth>자원 관리의 주체 Container는 서버에서 관리한다는 의미</res-auth>	
+	</resource-ref>
+	 -->
+	<resource-ref>
+		<res-ref-name>jdbc/studydb</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+	
+	<!-- 컨텍스트 매개변수 같은 웹 애플리케이션에 소속된 서블릿들이 공유하는 매개변수
+	<context-param>
+		<param-name>driver</param-name>
+		<param-value>com.mysql.jdbc.Driver</param-value>
+	</context-param>
+	<context-param>
+		<param-name>url</param-name>
+		<param-value>jdbc:mysql://localhost/studydb?serverTimezone=UTC</param-value>
+	</context-param>
+	<context-param>
+		<param-name>username</param-name>
+		<param-value>study</param-value>
+	</context-param>
+	<context-param>
+		<param-name>password</param-name>
+		<param-value>2jaeseung2</param-value>
+	</context-param>
+	-->
+	<!-- CharacterEncodingFilter클래스에 애노테이션을 이용해서 필터 배치를 했음
+	<filter>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<filter-class>spms.filters.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+ 	-->
+ 	
+ 	<!-- 리스너 등록 filter-mapping다음 servlet전에 하면 되나 2.5버전 이후부터는 순서에 상관없음 -->
+ 	<!-- 두가지 방법중 하나, ContextLoaderListener.java에 애노테이션으로 등록 해놓았으므로 필요없음 -->
+ 	<!--
+ 	<listener>
+ 		<listener-class>spms.listeners.ContextLoaderListener</listener-class>
+ 	</listener>
+	-->
+	
+	<!-- 서블릿 선언 -->
+	<!-- AppInitServlet은 DB객체 연결이였으나 ContextLoaderListener를 만들어서 DB와 member객체를 생성하므로 없앰
+	<servlet>
+		<servlet-name>AppInitServlet</servlet-name>
+		<servlet-class>spms.servlets.AppInitServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	-->
+	<!-- 
+	<servlet>
+		<servlet-name>매개변수이름</servlet-name>
+		<servlet-value>매개변수 값</servlet-value>
+	</servlet>
+	 -->
+ 	<!-- 서블릿 매개변수
+	<servlet>
+		<servlet-name>MemberUpdateServlet</servlet-name>
+		<servlet-class>spms.servlets.MemberUpdateServlet</servlet-class>
+		<init-param>
+			<param-name>driver</param-name>
+			<param-value>com.mysql.jdbc.Driver</param-value>
+		</init-param>
+		<init-param>
+			<param-name>url</param-name>
+			<param-value>jdbc:mysql://localhost/studydb?serverTimezone=UTC</param-value>
+		</init-param>
+		<init-param>
+			<param-name>username</param-name>
+			<param-value>study</param-value>
+		</init-param>
+		<init-param>
+			<param-name>password</param-name>
+			<param-value>2jaeseung2</param-value>
+		</init-param>
+	</servlet>
+	 -->
+	
+	<!-- 서블릿을 URL과 연결
+	<servlet-mapping>
+		<servlet-name>MemberUpdateServlet</servlet-name>
+		<url-pattern>/member/update</url-pattern>
+	</servlet-mapping>
+	-->
+	
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+</web-app>
