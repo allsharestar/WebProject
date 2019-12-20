@@ -10,139 +10,86 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+
 import spms.annotation.Component;
 import spms.vo.Project;
 
 @Component("projectDao")
 public class MySqlProjectDao implements ProjectDao{
-	DataSource ds;
+	// JDBC관련 소스 전부 삭제
+	// 이전에는 데이터베이스 커넥션을 얻기 위해서 DataSource 객체가 필요했으나 mybatis를 사용하면 더 이상 필요없어진다.
+	// 대신 SqlSessionFactory객체와 셋터 메서드를 선언한다. SqlSessionFactory는 SQL을 실행할 때 사용할 도구를 만들어 준다.
+	// SqlSession은 SQL을 실핼하는 도구이다. 이 객체로 SQL문을 실행한다. 직접 객체를 생성할 수 없고 SqlSessionFactory를 통해서만 얻을 수 있다.
+	// sqlSession = sqlSessionFactory.openSession()
+	SqlSessionFactory sqlSessionFactory;
 	
-	public void setDataSource(DataSource ds) {
-		this.ds = ds;
+	// SqlSession의 주요메서드
+	// selectList() select문을 실핼, 값 객체 목록을 반환함
+	// selectOne() select문을 실행, 하나의 값 객체를 반환함
+	// insert() insert문을 실행, 반환값은 입력한 데이터의 개수
+	// update() update문을 실행, 반환값은 변경한 데이터의 개수
+	// delete() delete문을 실행, 반환값은 삭제한 데이터의 개수
+
+	public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
+		this.sqlSessionFactory = sqlSessionFactory;
 	}
 	
 	@Override
 	public List<Project> selectList() throws Exception {
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		
+		SqlSession sqlSession = sqlSessionFactory.openSession();
 		try {
-			conn = ds.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("select PNO, PNAME, STA_DATE, END_DATE, STATE from PROJECTS order by PNO desc");
-			
-			ArrayList<Project> projects = new ArrayList<Project>();
-			
-			while(rs.next()) {
-				projects.add(new Project()
-						.setNo(rs.getInt("PNO"))
-						.setTitle(rs.getString("PNAME"))
-						.setStartDate(rs.getDate("STA_DATE"))
-						.setEndDate(rs.getDate("END_DATE"))
-						.setState(rs.getInt("STATE")));
-			}
-			
-			return projects;
-		} catch(Exception e) {
-			throw e;
+			// 매개변수는 SQL아이디이다. spms.dao.ProjectDao는 SQL맵페의 네임스페이스 이름이고
+			// selectList는 SQL 맵퍼 파일에서 selectList라는 아이디를 갖는 select태그를 가리키는 것이다.
+			return sqlSession.selectList("spms.dao.ProjectDao.selectList");
 		} finally {
-			try {if(rs != null) rs.close();} catch(Exception e) {}
-			try {if(stmt != null) stmt.close();} catch(Exception e) {}
-			try {if(conn != null) conn.close();} catch(Exception e) {}
+			// DB커넥션처럼 사용 후에는 닫아야합니다.
+			sqlSession.close();
 		}
 	}
 
 	@Override
 	public int insert(Project project) throws Exception { // 프로젝트 등록
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		
+		SqlSession sqlSession = sqlSessionFactory.openSession();
 		try {
-			conn = ds.getConnection();
-			stmt = conn.prepareStatement("insert into PROJECTS(PNAME, CONTENT, STA_DATE, END_DATE, STATE, CRE_DATE, TAGS) values(?, ?, ?, ?, 0, now(), ?)");
-			stmt.setString(1, project.getTitle());
-			stmt.setString(2, project.getContent());
-			stmt.setDate(3, new java.sql.Date(project.getStartDate().getTime()));
-			stmt.setDate(4, new java.sql.Date(project.getEndDate().getTime()));
-			stmt.setString(5, project.getTags());
-			
-			return stmt.executeUpdate();
-		}catch(Exception e) {
-			throw e;
+			int count = sqlSession.insert("spms.dao.ProjectDao.insert", project);
+			sqlSession.commit();
+			return count;
 		} finally {
-			try {if(conn != null) conn.close();} catch(Exception e) {}
-			try {if(stmt != null) stmt.close();} catch(Exception e) {}
+			sqlSession.close();
 		}
 	}
 	
 	public Project selectOne(int no) throws Exception {
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		
+		SqlSession sqlSession = sqlSessionFactory.openSession();
 		try {
-			conn = ds.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("select * from PROJECTS where PNO = " + no);
-			rs.next();
-			
-			Project project = new Project()
-					.setNo(rs.getInt("PNO"))
-					.setTitle(rs.getString("PNAME"))
-					.setContent(rs.getString("CONTENT"))
-					.setStartDate(rs.getDate("STA_DATE"))
-					.setEndDate(rs.getDate("END_DATE"))
-					.setState(rs.getInt("STATE"))
-					.setTags(rs.getString("TAGS"));
-			
-			return project;
-		}catch(Exception e) {
-			throw e;
-		}finally {
-			try {if(rs != null) rs.close();} catch(Exception e) {}
-			try {if(stmt != null) stmt.close();} catch(Exception e) {}
-			try {if(conn != null) conn.close();} catch(Exception e) {}
+			return sqlSession.selectOne("spms.dao.ProjectDao.selectOne", no);
+		} finally {
+			sqlSession.close();
 		}
 	}
 	
 	public int update(Project project) throws Exception {
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		
+		SqlSession sqlSession = sqlSessionFactory.openSession();
 		try {
-			conn = ds.getConnection();
-			stmt = conn.prepareStatement("update PROJECTS set PNAME=?, CONTENT=?, STA_DATE=?, END_DATE=?, STATE=?, TAGS=?");
-			stmt.setString(1, project.getTitle());
-			stmt.setString(2, project.getContent());
-			stmt.setDate(3, new java.sql.Date(project.getStartDate().getTime()));
-			stmt.setDate(4, new java.sql.Date(project.getEndDate().getTime()));
-			stmt.setInt(5, project.getState());
-			stmt.setString(6, project.getTags());
-			
-			return stmt.executeUpdate();
-		} catch(Exception e) {
-			throw e;
+			int count = sqlSession.update("spms.dao.ProjectDao.update", project);
+			sqlSession.commit();
+			return count;
 		} finally {
-			try {if(stmt != null) stmt.close();} catch(Exception e) {}
-			try {if(conn != null) conn.close();} catch(Exception e) {}
+			sqlSession.close();
 		}
 	}
 	
 	@Override
 	public int delete(int no) throws Exception {
-		Connection conn = null;
-		Statement stmt = null;
-		
+		SqlSession sqlSession = sqlSessionFactory.openSession();
 		try {
-			conn = ds.getConnection();
-			stmt = conn.createStatement();
-			return stmt.executeUpdate("delete from PROJECTS where PNO = " + no);
-		}catch(Exception e) {
-			throw e;
+			int count = sqlSession.delete("spms.dao.ProjectDao.delete", no);
+			sqlSession.commit();
+			return count;
 		} finally {
-			try {if(stmt != null) stmt.close();} catch(Exception e) {}
-			try {if(conn != null) conn.close();} catch(Exception e) {}
+			sqlSession.close();
 		}
 	}
 }
